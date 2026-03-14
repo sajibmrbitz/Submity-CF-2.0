@@ -16,9 +16,9 @@
     t.style.width = '100%';
     t.style.padding = '10px';
     t.style.borderRadius = '6px';
-    t.style.border = '1px solid #555';
-    t.style.background = '#2b2b2b';
-    t.style.color = '#e3e3e3';
+    // t.style.border = '1px solid #555';
+    // t.style.background = '#2b2b2b';
+    // t.style.color = '#e3e3e3';
     t.style.boxSizing = 'border-box';
     t.style.resize = 'vertical';
     t.style.outline = 'none';
