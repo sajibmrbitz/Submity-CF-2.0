@@ -7,19 +7,10 @@
     return el ? el.innerText.trim() : null;
   }
 
-  // ম্যাজিক ট্রিক: অদৃশ্য ফ্রেম তৈরি করা হচ্ছে
-  function setupHiddenIframe() {
-    let iframe = document.getElementById('submity-hidden-frame');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.id = 'submity-hidden-frame';
-      iframe.name = 'submity-hidden-frame';
-      iframe.style.display = 'none'; // একদম অদৃশ্য
-      document.body.appendChild(iframe);
-    }
-  }
+  function startTracking(btn) {
+    const handle = getHandle();
+    if(!handle) return;
 
-  function startTracking(btn, handle, lastSubId) {
     let statusDiv = document.getElementById('submity-live-status');
     if(!statusDiv) {
       statusDiv = document.createElement('div');
@@ -28,50 +19,65 @@
       statusDiv.style.fontWeight = 'bold';
       statusDiv.style.fontSize = '14px';
       statusDiv.style.textAlign = 'center';
+      statusDiv.style.padding = '8px';
+      statusDiv.style.borderRadius = '4px';
       btn.parentNode.appendChild(statusDiv);
     }
 
     statusDiv.innerText = "Submitting... Waiting for verdict...";
     statusDiv.style.color = "#005aab";
+    statusDiv.style.background = "#e1f5fe";
 
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=2`);
-        const data = await res.json();
-        
-        if (data.status === "OK" && data.result.length > 0) {
-          // আগের সাবমিশনের আইডির চেয়ে বড় আইডি খুঁজছি (Race Condition ফিক্স)
-          const newSub = data.result.find(sub => sub.id > lastSubId);
-          
-          if (!newSub) return; // সার্ভারে আপডেট না হওয়া পর্যন্ত ওয়েট করবে
+    setTimeout(() => {
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=1&_=${Date.now()}`, { cache: 'no-store' });
+          const data = await res.json();
+          if (data.status === "OK" && data.result.length > 0) {
+            const sub = data.result[0];
+            const verdict = sub.verdict;
+            const passCount = sub.passedTestCount;
 
-          const verdict = newSub.verdict;
-          const passCount = newSub.passedTestCount;
-
-          if (!verdict || verdict === "TESTING") {
-            statusDiv.innerText = `Running on test ${passCount + 1}...`;
-            statusDiv.style.color = "#ff8c00";
-          } else {
-            clearInterval(interval);
-            if (verdict === "OK") {
-              statusDiv.innerText = `Accepted (Passed ${passCount} tests)`; // ইমোজি সরানো হয়েছে
-              statusDiv.style.color = "#00a900";
+            if (!verdict || verdict === "TESTING") {
+              statusDiv.innerText = `Running on test ${passCount + 1}...`;
+              statusDiv.style.color = "#ff8c00";
+              statusDiv.style.background = "#fff3e0";
             } else {
-              statusDiv.innerText = `${verdict.replace(/_/g, ' ')} on test ${passCount + 1}`;
-              statusDiv.style.color = "red";
+              clearInterval(interval);
+              if (verdict === "OK") {
+                statusDiv.innerText = `Accepted (Passed ${passCount} tests)`;
+                statusDiv.style.color = "#00a900";
+                statusDiv.style.background = "#e8f5e9";
+              } else {
+                statusDiv.innerText = `${verdict.replace(/_/g, ' ')} on test ${passCount + 1}`;
+                statusDiv.style.color = "white";
+                statusDiv.style.background = "#ef5350";
+              }
             }
           }
+        } catch (e) {
+          statusDiv.innerText = "Error tracking verdict!";
+          statusDiv.style.color = "white";
+          statusDiv.style.background = "#d32f2f";
+          clearInterval(interval);
         }
-      } catch (e) {
-        statusDiv.innerText = "Error tracking verdict!";
-        statusDiv.style.color = "red";
-        clearInterval(interval);
-      }
+      }, 2000);
     }, 2000);
   }
 
+  function setupHiddenIframe() {
+    let iframe = document.getElementById('submity-hidden-frame');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'submity-hidden-frame';
+      iframe.name = 'submity-hidden-frame';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+  }
+
   function convert() {
-    setupHiddenIframe(); // ফ্রেম কল করা হলো
+    setupHiddenIframe();
 
     const input = document.querySelector('input[name="sourceFile"]');
     if (!input) return false;
@@ -102,7 +108,6 @@
     if (f.length > 1) f[1].innerText = 'Put Code Here:';
 
     const form = document.querySelector('.submitForm, form.submitForm');
-    // টার্গেট '_blank' এর বদলে আমাদের অদৃশ্য ফ্রেমে সেট করা হলো!
     if (form) form.setAttribute('target', 'submity-hidden-frame');
 
     const btn = document.querySelector('.submit, button[type="submit"]');
@@ -112,60 +117,16 @@
   }
 
   function notices() {
-    function adj(id) {
-      const n = document.querySelector('.programTypeNotice');
-      if (!n) return;
-      n.textContent = '';
-      if (id === 7 || id === 31) n.textContent = 'Almost always, if you send a solution on PyPy, it works much faster';
-    }
-
-    adj(54);
-
-    const sel = document.querySelector("select[name='programTypeId']");
-    if (sel) sel.addEventListener('change', function () { adj(parseInt(this.value || '0', 10)); });
-
     const forms = $all('.submit-form, .submitForm');
     forms.forEach(form => {
-      form.addEventListener('submit', async function () {
-        
-        try {
-          const ftaa = form.querySelector("textarea[name='ftaa']");
-          const bfaa = form.querySelector("textarea[name='bfaa']");
-          if (window._ftaa && window._bfaa) {
-            if (ftaa) ftaa.value = window._ftaa;
-            if (bfaa) bfaa.value = window._bfaa;
-          }
-        } catch(e){}
-
-        try {
-          if (form.getAttribute('enctype') === 'multipart/form-data') {
-            const sf = form.querySelector(".table-form textarea[name=sourceFile]");
-            if (sf && (!sf.files || sf.files.length === 0)) form.removeAttribute('enctype');
-          }
-        } catch(e){}
-
-        // সাবমিট করার ঠিক আগের সাবমিশন আইডিটা বের করে নিচ্ছি
-        const handle = getHandle();
-        let lastSubId = -1;
-        if (handle) {
-          try {
-            const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=1`);
-            const data = await res.json();
-            if(data.status === "OK" && data.result.length > 0) {
-              lastSubId = data.result[0].id;
-            }
-          } catch(e) {}
-        }
-
+      form.addEventListener('submit', function () {
         const btns = $all('button[type="submit"], .submit', form);
         btns.forEach(b => {
           b.disabled = true;
-          startTracking(b, handle, lastSubId); 
+          startTracking(b); 
         });
-        
         setTimeout(() => btns.forEach(b => b.disabled = false), 1500);
-        
-        return true; // ফর্ম নরমালি সাবমিট হতে দিলাম (অদৃশ্য ফ্রেমে)
+        return true;
       });
     });
   }
@@ -192,3 +153,15 @@
   }, 500);
   setTimeout(() => clearInterval(retry), 10000);
 })();
+
+/*
+  =========================================
+  OUTPUT EXPECTATION ON CODEFORCES:
+  =========================================
+  1. No new tabs will open (submits via iframe).
+  2. Live verdict tracker starts immediately below the button.
+  3. Displays "Submitting... Waiting for verdict..." (Blue).
+  4. Updates to "Running on test X..." (Orange).
+  5. Final verdict like "Accepted (Passed X tests)" (Green) or WA (Red).
+  =========================================
+*/

@@ -35,7 +35,7 @@ The extension now includes support for Firefox. To install it manually:
 3. Click on **"This Firefox"** in the left sidebar.
 4. Click the **"Load Temporary Add-on..."** button.
 5. Select the `manifest.json` file from your extracted folder.
-*(Note: As this is a temporary add-on, Firefox will remove it when you restart the browser. A permanent store release will be available in the future. Please report any bugs in the Issues section!)*
+*(Note: As this is a temporary add-on, Firefox will remove it when you restart the browser and there will be issues. A permanent store release will be available in the future. Please report any bugs in the Issues section!)*
 
 ## Feedback
 

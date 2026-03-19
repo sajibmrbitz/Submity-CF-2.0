@@ -1,14 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Submitify CF",
-  "version": "1.2.0",
-  "description": "Textarea-based submission for Codeforces.",
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "submity-cf-2.0@sajibmrbitz.github.io",
-      "strict_min_version": "109.0"
-    }
-  },
+  "name": "Submitify CF 2.0",
+  "version": "2.0.0",
+  "description": "Textarea-based submission for Codeforces with Live Tracker.",
   "content_scripts": [
     {
       "matches": [
@@ -20,10 +14,5 @@
       "run_at": "document_idle"
     }
   ],
-  "permissions": [],
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  }
+  "permissions": []
 }
