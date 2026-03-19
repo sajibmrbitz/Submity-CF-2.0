@@ -28,6 +28,15 @@ This small change helps make the workflow smoother and can save time during cont
 
 The extension will then be active on Codeforces.
 
+### For Firefox:
+The extension now includes support for Firefox. To install it manually:
+1. Download the `Source code (zip)` file from the latest release and extract it.
+2. Open Firefox and type `about:debugging` in the address bar, then press Enter.
+3. Click on **"This Firefox"** in the left sidebar.
+4. Click the **"Load Temporary Add-on..."** button.
+5. Select the `manifest.json` file from your extracted folder.
+*(Note: As this is a temporary add-on, Firefox will remove it when you restart the browser. A permanent store release will be available in the future. Please report any bugs in the Issues section!)*
+
 ## Feedback
 
 If you try the extension, feel free to share your **feedback or suggestions**.

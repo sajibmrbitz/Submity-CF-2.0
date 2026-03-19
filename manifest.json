@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Submitify CF",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Textarea-based submission for Codeforces.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "submity-cf-2.0@sajibmrbitz.github.io",
+      "strict_min_version": "109.0"
+    }
+  },
   "content_scripts": [
     {
       "matches": [
