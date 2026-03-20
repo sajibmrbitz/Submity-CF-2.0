@@ -1,3 +1,4 @@
+![Submity-CF Demo](demo.gif)
 # Submity — Codeforces Submission Helper
 
 Submity is a lightweight browser extension for Chromium and Firefox-based browsers that makes submitting solutions on Codeforces faster and more convenient.
