@@ -3,6 +3,12 @@
   "name": "Submitify CF 2.0",
   "version": "2.0.0",
   "description": "Textarea-based submission for Codeforces with Live Tracker.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{d40341da-b361-4c83-a44c-8e173f440232}",
+      "strict_min_version": "109.0"
+    }
+  },
   "content_scripts": [
     {
       "matches": [

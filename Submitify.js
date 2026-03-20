@@ -8,21 +8,37 @@
     document.querySelector('.submit, button[type="submit"]').parentNode.appendChild(statusDiv);
 
     const interval = setInterval(async () => {
-      const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=2&_=${Date.now()}`);
-      const data = await res.json();
-      const newSub = data.result.find(s => s.id > lastSubId);
-      
-      if (!newSub) { statusDiv.innerText = "Submitting..."; return; }
-      
-      if (!newSub.verdict || newSub.verdict === "TESTING") {
-        statusDiv.innerText = `Running on test ${newSub.passedTestCount + 1}...`;
-        statusDiv.style.color = "orange";
-      } else {
-        clearInterval(interval);
-        statusDiv.innerText = (newSub.verdict === "OK" ? "Accepted ✨" : newSub.verdict.replace(/_/g, ' ')) + ` (Test ${newSub.passedTestCount + (newSub.verdict==="OK"?0:1)})`;
-        statusDiv.style.color = (newSub.verdict === "OK" ? "green" : "red");
+      try {
+        const res = await fetch(`https://codeforces.com/api/user.status?handle=${handle}&from=1&count=2&_=${Date.now()}`);
+        
+        if (res.status === 429) {
+          statusDiv.innerText = "Rate limited. Pausing tracker...";
+          statusDiv.style.color = "orange";
+          clearInterval(interval);
+          return;
+        }
+
+        const data = await res.json();
+        if (data.status === "FAILED") {
+          console.warn("API Error:", data.comment);
+          return;
+        }
+
+        const newSub = data.result.find(s => s.id > lastSubId);
+        if (!newSub) { statusDiv.innerText = "Submitting..."; return; }
+        
+        if (!newSub.verdict || newSub.verdict === "TESTING") {
+          statusDiv.innerText = `Running on test ${newSub.passedTestCount + 1}...`;
+          statusDiv.style.color = "orange";
+        } else {
+          clearInterval(interval);
+          statusDiv.innerText = (newSub.verdict === "OK" ? "Accepted ✨" : newSub.verdict.replace(/_/g, ' ')) + ` (Test ${newSub.passedTestCount + (newSub.verdict==="OK"?0:1)})`;
+          statusDiv.style.color = (newSub.verdict === "OK" ? "green" : "red");
+        }
+      } catch (err) {
+        console.error("Fetch error:", err);
       }
-    }, 2000);
+    }, 3000);
   }
 
   function init() {
